@@ -1,0 +1,35 @@
+{
+  "name": "bin-serde",
+  "version": "1.0.0",
+  "description": "A low level library for efficiently writing and reading binary data in javascript",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hathora/bin-serde.git"
+  },
+  "keywords": [
+    "binary",
+    "serialization",
+    "serde",
+    "encode",
+    "decode"
+  ],
+  "author": "Harsh Pandey",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hathora/bin-serde/issues"
+  },
+  "homepage": "https://github.com/hathora/bin-serde#readme",
+  "dependencies": {
+    "utf8-buffer": "^1.0.0",
+    "utf8-buffer-size": "^0.0.4"
+  },
+  "devDependencies": {
+    "typescript": "^4.5.5"
+  }
+}
