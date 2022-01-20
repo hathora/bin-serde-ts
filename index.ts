@@ -21,6 +21,13 @@ export class Writer {
     return this;
   }
 
+  public writeUInt64(val: bigint) {
+    this.ensureSize(8);
+    this.view.setBigUint64(this.pos, val);
+    this.pos += 8;
+    return this;
+  }
+
   public writeUVarint(val: number) {
     if (val < 0x80) {
       this.ensureSize(1);
@@ -146,6 +153,12 @@ export class Reader {
   public readUInt32() {
     const val = this.view.getUint32(this.pos);
     this.pos += 4;
+    return val;
+  }
+
+  public readUInt64() {
+    const val = this.view.getBigUint64(this.pos);
+    this.pos += 8;
     return val;
   }
 
