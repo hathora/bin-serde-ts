@@ -4,8 +4,13 @@ const { pack, unpack } = (utf8 as any).default ?? utf8;
 
 export class Writer {
   private pos = 0;
-  private view = new DataView(new ArrayBuffer(64));
-  private bytes = new Uint8Array(this.view.buffer);
+  private view: DataView;
+  private bytes: Uint8Array;
+
+  public constructor() {
+    this.view = new DataView(new ArrayBuffer(64));
+    this.bytes = new Uint8Array(this.view.buffer);
+  }
 
   public writeUInt8(val: number) {
     this.ensureSize(1);
