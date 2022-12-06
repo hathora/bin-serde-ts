@@ -1,5 +1,7 @@
 import { pack, unpack } from "./utf8-buffer.js";
 import utf8Size from "utf8-buffer-size";
+const BI_ONE = BigInt(1);
+const BI_SIX_THREE = BigInt(63);
 
 export class Writer {
   private pos = 0;
@@ -78,7 +80,7 @@ export class Writer {
 
   public writeVarint(val: number) {
     const bigval = BigInt(val);
-    this.writeUVarint(Number((bigval >> 63n) ^ (bigval << 1n)));
+    this.writeUVarint(Number((bigval >> BI_SIX_THREE) ^ (bigval << BI_ONE)));
     return this;
   }
 
@@ -179,7 +181,7 @@ export class Reader {
 
   public readVarint() {
     const val = BigInt(this.readUVarint());
-    return Number((val >> 1n) ^ -(val & 1n));
+    return Number((val >> BI_ONE) ^ -(val & BI_ONE));
   }
 
   public readFloat() {
