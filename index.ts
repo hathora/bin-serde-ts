@@ -1,7 +1,5 @@
 import { pack, unpack } from "./utf8-buffer.js";
 import utf8Size from "utf8-buffer-size";
-const BI_ONE = BigInt(1);
-const BI_SIX_THREE = BigInt(63);
 
 export class Writer {
   private pos = 0;
@@ -41,18 +39,28 @@ export class Writer {
       this.pos += 1;
     } else if (val < 0x4000) {
       this.ensureSize(2);
-      this.view.setUint16(this.pos, (val & 0x7f) | ((val & 0x3f80) << 1) | 0x8000);
+      this.view.setUint16(
+        this.pos,
+        (val & 0x7f) | ((val & 0x3f80) << 1) | 0x8000
+      );
       this.pos += 2;
     } else if (val < 0x200000) {
       this.ensureSize(3);
       this.view.setUint8(this.pos, (val >> 14) | 0x80);
-      this.view.setUint16(this.pos + 1, (val & 0x7f) | ((val & 0x3f80) << 1) | 0x8000);
+      this.view.setUint16(
+        this.pos + 1,
+        (val & 0x7f) | ((val & 0x3f80) << 1) | 0x8000
+      );
       this.pos += 3;
     } else if (val < 0x10000000) {
       this.ensureSize(4);
       this.view.setUint32(
         this.pos,
-        (val & 0x7f) | ((val & 0x3f80) << 1) | ((val & 0x1fc000) << 2) | ((val & 0xfe00000) << 3) | 0x80808000
+        (val & 0x7f) |
+          ((val & 0x3f80) << 1) |
+          ((val & 0x1fc000) << 2) |
+          ((val & 0xfe00000) << 3) |
+          0x80808000
       );
       this.pos += 4;
     } else if (val < 0x800000000) {
@@ -60,27 +68,32 @@ export class Writer {
       this.view.setUint8(this.pos, Math.floor(val / Math.pow(2, 28)) | 0x80);
       this.view.setUint32(
         this.pos + 1,
-        (val & 0x7f) | ((val & 0x3f80) << 1) | ((val & 0x1fc000) << 2) | ((val & 0xfe00000) << 3) | 0x80808000
+        (val & 0x7f) |
+          ((val & 0x3f80) << 1) |
+          ((val & 0x1fc000) << 2) |
+          ((val & 0xfe00000) << 3) |
+          0x80808000
       );
       this.pos += 5;
     } else if (val < 0x40000000000) {
       this.ensureSize(6);
       const shiftedVal = Math.floor(val / Math.pow(2, 28));
-      this.view.setUint16(this.pos, (shiftedVal & 0x7f) | ((shiftedVal & 0x3f80) << 1) | 0x8080);
+      this.view.setUint16(
+        this.pos,
+        (shiftedVal & 0x7f) | ((shiftedVal & 0x3f80) << 1) | 0x8080
+      );
       this.view.setUint32(
         this.pos + 2,
-        (val & 0x7f) | ((val & 0x3f80) << 1) | ((val & 0x1fc000) << 2) | ((val & 0xfe00000) << 3) | 0x80808000
+        (val & 0x7f) |
+          ((val & 0x3f80) << 1) |
+          ((val & 0x1fc000) << 2) |
+          ((val & 0xfe00000) << 3) |
+          0x80808000
       );
       this.pos += 6;
     } else {
       throw new Error("Value out of range");
     }
-    return this;
-  }
-
-  public writeVarint(val: number) {
-    const bigval = BigInt(val);
-    this.writeUVarint(Number((bigval >> BI_SIX_THREE) ^ (bigval << BI_ONE)));
     return this;
   }
 
@@ -147,7 +160,11 @@ export class Reader {
 
   public constructor(buf: ArrayBufferView) {
     this.view = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
-    this.bytes = new Uint8Array(this.view.buffer, buf.byteOffset, buf.byteLength);
+    this.bytes = new Uint8Array(
+      this.view.buffer,
+      buf.byteOffset,
+      buf.byteLength
+    );
   }
 
   public readUInt8() {
@@ -177,11 +194,6 @@ export class Reader {
       }
       val = (val + (byte & 0x7f)) * 128;
     }
-  }
-
-  public readVarint() {
-    const val = BigInt(this.readUVarint());
-    return Number((val >> BI_ONE) ^ -(val & BI_ONE));
   }
 
   public readFloat() {
