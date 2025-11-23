@@ -201,8 +201,10 @@ export class Reader {
     return bits;
   }
 
-  public readString() {
-    const len = this.readUVarint();
+  public readString(len?: number) {
+    if (len === undefined) {
+      len = this.readUVarint();
+    }
     if (len === 0) {
       return "";
     }
