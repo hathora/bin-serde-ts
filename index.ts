@@ -114,16 +114,25 @@ export class Writer {
     return this;
   }
 
-  public writeStringUtf8(val: string) {
-    if (val.length > 0) {
-      const byteSize = utf8Size(val);
-      this.writeUVarint(byteSize);
-      this.ensureSize(byteSize);
+  public writeStringUtf8(val: string, len?: number) {
+    if (len != null) {
+      if (len === 0) {
+        return this;
+      }
+      this.ensureSize(len);
       pack(val, this.bytes, this.pos);
-      this.pos += byteSize;
-    } else {
-      this.writeUInt8(0);
+      this.pos += len;
+      return this;
     }
+    if (val.length === 0) {
+      this.writeUVarint(0);
+      return this;
+    }
+    const byteSize = utf8Size(val);
+    this.writeUVarint(byteSize);
+    this.ensureSize(byteSize);
+    pack(val, this.bytes, this.pos);
+    this.pos += byteSize;
     return this;
   }
 
@@ -224,7 +233,7 @@ export class Reader {
   }
 
   public readStringUtf8(len?: number) {
-    if (len === undefined) {
+    if (len == null) {
       len = this.readUVarint();
     }
     if (len === 0) {
