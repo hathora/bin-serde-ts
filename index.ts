@@ -103,7 +103,19 @@ export class Writer {
     return this;
   }
 
-  public writeString(val: string) {
+  public writeStringAscii(val: string) {
+    if (val.length === 0) {
+      this.writeUInt8(0);
+      return this;
+    }
+    this.ensureSize(val.length);
+    for (let i = 0; i < val.length; i++) {
+      this.view.setUint8(this.pos++, val.charCodeAt(i));
+    }
+    return this;
+  }
+
+  public writeStringUtf8(val: string) {
     if (val.length > 0) {
       const byteSize = utf8Size(val);
       this.writeUVarint(byteSize);
@@ -201,7 +213,18 @@ export class Reader {
     return bits;
   }
 
-  public readString(len?: number) {
+  public readStringAscii(len: number) {
+    if (len === 0) {
+      return "";
+    }
+    let val = "";
+    for (let i = 0; i < len; i++) {
+      val += String.fromCharCode(this.view.getUint8(this.pos++));
+    }
+    return val;
+  }
+
+  public readStringUtf8(len?: number) {
     if (len === undefined) {
       len = this.readUVarint();
     }
