@@ -105,7 +105,6 @@ export class Writer {
 
   public writeStringAscii(val: string) {
     if (val.length === 0) {
-      this.writeUInt8(0);
       return this;
     }
     this.ensureSize(val.length);
