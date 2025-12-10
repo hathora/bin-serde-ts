@@ -1,13 +1,34 @@
 import { pack, unpack } from "./utf8-buffer.js";
 import utf8Size from "utf8-buffer-size";
 
+const SLAB_SIZE = 8192;
+const MAX_POOLED = 4096;
+
+let slab: Uint8Array = new Uint8Array(SLAB_SIZE);
+let slabOffset = 0;
+
+function allocFromSlab(size: number): Uint8Array {
+  if (size > MAX_POOLED) {
+    // Too large for pool, allocate directly
+    return new Uint8Array(size);
+  }
+  if (slabOffset + size > SLAB_SIZE) {
+    // Slab full, allocate new one
+    slab = new Uint8Array(SLAB_SIZE);
+    slabOffset = 0;
+  }
+  const buf = slab.subarray(slabOffset, slabOffset + size);
+  slabOffset += size;
+  return buf;
+}
+
 export class Writer {
   private pos = 0;
   private bytes: Uint8Array;
-  private _view: DataView | null = null;
+  private _view: DataView | null = null; // lazily allocated
 
   constructor(initialSize = 256) {
-    this.bytes = new Uint8Array(Math.max(initialSize, 16));
+    this.bytes = allocFromSlab(Math.max(initialSize, 16));
   }
 
   writeUInt8(val: number) {
@@ -60,8 +81,7 @@ export class Writer {
   }
 
   writeVarint(val: number) {
-    this.writeUVarint((val << 1) ^ (val >> 31));
-    return this;
+    return this.writeUVarint((val << 1) ^ (val >> 31));
   }
 
   writeFloat(val: number) {
@@ -156,7 +176,7 @@ export class Writer {
     while (newSize < this.pos + size) {
       newSize *= 2;
     }
-    const newBytes = new Uint8Array(newSize);
+    const newBytes = allocFromSlab(newSize);
     newBytes.set(this.bytes);
     this.bytes = newBytes;
     this._view = null;
