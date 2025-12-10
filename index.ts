@@ -184,6 +184,12 @@ export class Reader {
     return this.bytes[this.pos++];
   }
 
+  readUInt16() {
+    const val = this.view.getUint16(this.pos);
+    this.pos += 2;
+    return val;
+  }
+
   readUInt32() {
     const val = this.view.getUint32(this.pos);
     this.pos += 4;
