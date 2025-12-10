@@ -184,7 +184,7 @@ export class Writer {
 
   private get view(): DataView {
     if (!this._view) {
-      this._view = new DataView(this.bytes.buffer);
+      this._view = new DataView(this.bytes.buffer, this.bytes.byteOffset);
     }
     return this._view;
   }
