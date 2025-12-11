@@ -7,6 +7,9 @@ const MAX_POOLED = 4096;
 let slab: Uint8Array = new Uint8Array(SLAB_SIZE);
 let slabOffset = 0;
 
+const f32 = new Float32Array(1);
+const f32u8 = new Uint8Array(f32.buffer);
+
 function allocFromSlab(size: number): Uint8Array {
   if (size > MAX_POOLED) {
     // Too large for pool, allocate directly
@@ -111,8 +114,11 @@ export class Writer {
 
   writeFloat(val: number) {
     this.ensureSize(4);
-    this.view.setFloat32(this.pos, val, true);
-    this.pos += 4;
+    f32[0] = val;
+    this.bytes[this.pos++] = f32u8[0]!;
+    this.bytes[this.pos++] = f32u8[1]!;
+    this.bytes[this.pos++] = f32u8[2]!;
+    this.bytes[this.pos++] = f32u8[3]!;
     return this;
   }
 
@@ -258,9 +264,11 @@ export class Reader {
   }
 
   readFloat() {
-    const val = this.view.getFloat32(this.pos, true);
-    this.pos += 4;
-    return val;
+    f32u8[0] = this.bytes[this.pos++];
+    f32u8[1] = this.bytes[this.pos++];
+    f32u8[2] = this.bytes[this.pos++];
+    f32u8[3] = this.bytes[this.pos++];
+    return f32[0];
   }
 
   readBits(numBits: number) {
