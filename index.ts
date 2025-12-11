@@ -53,23 +53,47 @@ export class Writer {
 
   writeUVarint(val: number) {
     if (val < 0x80) {
+      // 1 byte: 0-127
       this.writeUInt8(val);
     } else if (val < 0x4000) {
+      // 2 bytes: 128 - 16,383
       this.writeUInt16((val & 0x7f) | ((val & 0x3f80) << 1) | 0x8000);
     } else if (val < 0x200000) {
+      // 3 bytes: 16,384 - 2,097,151
       this.writeUInt8((val >> 14) | 0x80);
       this.writeUInt16((val & 0x7f) | ((val & 0x3f80) << 1) | 0x8000);
     } else if (val < 0x10000000) {
+      // 4 bytes: 2,097,152 - 268,435,455
       this.writeUInt32(
         (val & 0x7f) | ((val & 0x3f80) << 1) | ((val & 0x1fc000) << 2) | ((val & 0xfe00000) << 3) | 0x80808000
       );
     } else if (val < 0x800000000) {
+      // 5 bytes: 268,435,456 - 34,359,738,367
       this.writeUInt8(Math.floor(val / 0x10000000) | 0x80);
       this.writeUInt32(
         (val & 0x7f) | ((val & 0x3f80) << 1) | ((val & 0x1fc000) << 2) | ((val & 0xfe00000) << 3) | 0x80808000
       );
     } else if (val < 0x40000000000) {
+      // 6 bytes: 34,359,738,368 - 4,398,046,511,103
       const shiftedVal = Math.floor(val / 0x10000000);
+      this.writeUInt16((shiftedVal & 0x7f) | ((shiftedVal & 0x3f80) << 1) | 0x8080);
+      this.writeUInt32(
+        (val & 0x7f) | ((val & 0x3f80) << 1) | ((val & 0x1fc000) << 2) | ((val & 0xfe00000) << 3) | 0x80808000
+      );
+    } else if (val < 0x2000000000000) {
+      // 7 bytes: 4,398,046,511,104 - 562,949,953,421,311
+      const shiftedVal = Math.floor(val / 0x10000000);
+      this.writeUInt8((Math.floor(shiftedVal / 0x4000) & 0x7f) | 0x80);
+      this.writeUInt16((shiftedVal & 0x7f) | ((shiftedVal & 0x3f80) << 1) | 0x8080);
+      this.writeUInt32(
+        (val & 0x7f) | ((val & 0x3f80) << 1) | ((val & 0x1fc000) << 2) | ((val & 0xfe00000) << 3) | 0x80808000
+      );
+    } else if (val <= Number.MAX_SAFE_INTEGER) {
+      // 8 bytes: 562,949,953,421,312 - 9,007,199,254,740,991 (MAX_SAFE_INTEGER)
+      const shiftedVal = Math.floor(val / 0x10000000);
+      this.writeUInt16(
+        (Math.floor(shiftedVal / 0x4000) & 0x7f) | ((Math.floor(shiftedVal / 0x4000) & 0x3f80) << 1) | 0x8080
+      );
       this.writeUInt16((shiftedVal & 0x7f) | ((shiftedVal & 0x3f80) << 1) | 0x8080);
       this.writeUInt32(
         (val & 0x7f) | ((val & 0x3f80) << 1) | ((val & 0x1fc000) << 2) | ((val & 0xfe00000) << 3) | 0x80808000
@@ -81,7 +105,8 @@ export class Writer {
   }
 
   writeVarint(val: number) {
-    return this.writeUVarint((val << 1) ^ (val >> 31));
+    const encoded = val >= 0 ? val * 2 : val * -2 - 1;
+    return this.writeUVarint(encoded);
   }
 
   writeFloat(val: number) {
@@ -229,7 +254,7 @@ export class Reader {
 
   readVarint() {
     const val = this.readUVarint();
-    return (val >>> 1) ^ -(val & 1);
+    return val % 2 === 0 ? val / 2 : -(val + 1) / 2;
   }
 
   readFloat() {
