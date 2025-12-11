@@ -1,6 +1,6 @@
 {
   "name": "bin-serde",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "description": "A low level library for efficiently writing and reading binary data in javascript",
   "type": "module",
   "main": "lib/index.js",
