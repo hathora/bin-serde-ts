@@ -1,6 +1,6 @@
 {
   "name": "bin-serde",
-  "version": "1.6.5",
+  "version": "1.6.9",
   "description": "A low level library for efficiently writing and reading binary data in javascript",
   "type": "module",
   "main": "lib/index.js",
@@ -30,6 +30,7 @@
     "utf8-buffer-size": "^0.0.4"
   },
   "devDependencies": {
-    "typescript": "^4.5.5"
+    "@types/node": "^25.0.1",
+    "typescript": "^5.9.3"
   }
 }

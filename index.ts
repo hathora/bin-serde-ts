@@ -4,7 +4,7 @@ import utf8Size from "utf8-buffer-size";
 const SLAB_SIZE = 8192;
 const MAX_POOLED = 4096;
 
-let slab: Uint8Array = new Uint8Array(SLAB_SIZE);
+let slab = allocUint8Array(SLAB_SIZE);
 let slabOffset = 0;
 
 const f32 = new Float32Array(1);
@@ -13,16 +13,20 @@ const f32u8 = new Uint8Array(f32.buffer);
 function allocFromSlab(size: number): Uint8Array {
   if (size > MAX_POOLED) {
     // Too large for pool, allocate directly
-    return new Uint8Array(size);
+    return allocUint8Array(size);
   }
   if (slabOffset + size > SLAB_SIZE) {
     // Slab full, allocate new one
-    slab = new Uint8Array(SLAB_SIZE);
+    slab = allocUint8Array(SLAB_SIZE);
     slabOffset = 0;
   }
   const buf = slab.subarray(slabOffset, slabOffset + size);
   slabOffset += size;
   return buf;
+}
+
+function allocUint8Array(size: number): Uint8Array {
+  return typeof Buffer !== "undefined" ? Buffer.allocUnsafe(size) : new Uint8Array(size);
 }
 
 export class Writer {

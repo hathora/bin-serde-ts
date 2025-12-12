@@ -4,7 +4,6 @@
     "module": "esnext",
     "moduleResolution": "node",
     "declaration": true,
-    "allowJs": true,
     "outDir": "./lib",
     "strict": true
   }
