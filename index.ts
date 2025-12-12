@@ -224,11 +224,10 @@ export class Writer {
 export class Reader {
   private pos = 0;
   private bytes: Uint8Array;
-  private view: DataView;
+  private _view: DataView | null = null; // lazily allocated
 
   constructor(buf: Uint8Array) {
     this.bytes = buf;
-    this.view = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
   }
 
   readUInt8() {
@@ -314,5 +313,12 @@ export class Reader {
 
   remaining() {
     return this.bytes.length - this.pos;
+  }
+
+  private get view(): DataView {
+    if (!this._view) {
+      this._view = new DataView(this.bytes.buffer, this.bytes.byteOffset);
+    }
+    return this._view;
   }
 }
