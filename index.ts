@@ -157,6 +157,11 @@ export class Writer {
     return this.bytes.subarray(0, this.pos);
   }
 
+  reset(): this {
+    this.pos = 0;
+    return this;
+  }
+
   get size(): number {
     return this.pos;
   }
