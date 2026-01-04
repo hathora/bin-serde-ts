@@ -159,6 +159,8 @@ export class Writer {
 
   reset(): this {
     this.pos = 0;
+    this.bytes = allocFromSlab(this.bytes.length);
+    this._view = null;
     return this;
   }
 
