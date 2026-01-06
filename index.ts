@@ -154,9 +154,8 @@ export class Writer {
   }
 
   toBuffer() {
-    return typeof Buffer !== "undefined"
-      ? Buffer.from(this.bytes.buffer, this.bytes.byteOffset, this.pos)
-      : this.bytes.slice(0, this.pos);
+    const view = this.bytes.subarray(0, this.pos);
+    return typeof Buffer !== "undefined" ? Buffer.from(view) : view.slice();
   }
 
   reset() {
