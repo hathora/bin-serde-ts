@@ -154,13 +154,13 @@ export class Writer {
   }
 
   toBuffer() {
-    return this.bytes.subarray(0, this.pos);
+    return typeof Buffer !== "undefined"
+      ? Buffer.from(this.bytes.buffer, this.bytes.byteOffset, this.pos)
+      : this.bytes.slice(0, this.pos);
   }
 
-  reset(): this {
+  reset() {
     this.pos = 0;
-    this.bytes = allocFromSlab(this.bytes.length);
-    this._view = null;
     return this;
   }
 
