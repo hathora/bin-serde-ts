@@ -288,6 +288,13 @@ export class Reader {
     return this.bytes.length - this.pos;
   }
 
+  reset(buf: Uint8Array) {
+    this.bytes = buf;
+    this.pos = 0;
+    this._view = null;
+    return this;
+  }
+
   private get view(): DataView {
     if (!this._view) {
       this._view = new DataView(this.bytes.buffer, this.bytes.byteOffset);
