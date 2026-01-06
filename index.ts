@@ -9,6 +9,8 @@ let slabOffset = 0;
 
 const f32 = new Float32Array(1);
 const f32u8 = new Uint8Array(f32.buffer);
+const copyBuffer =
+  typeof Buffer !== "undefined" ? (buf: Uint8Array) => Buffer.from(buf) : (buf: Uint8Array) => buf.slice();
 
 function allocFromSlab(size: number): Uint8Array {
   if (size > MAX_POOLED) {
@@ -154,8 +156,7 @@ export class Writer {
   }
 
   toBuffer() {
-    const view = this.bytes.subarray(0, this.pos);
-    return typeof Buffer !== "undefined" ? Buffer.from(view) : view.slice();
+    return copyBuffer(this.bytes.subarray(0, this.pos));
   }
 
   reset() {
