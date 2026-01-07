@@ -1,4 +1,5 @@
 const textDecoder = new TextDecoder();
+const textEncoder = new TextEncoder();
 const hasBuffer = typeof Buffer !== "undefined";
 
 export function unpack(buffer: Uint8Array, start = 0, end = buffer.length): string {
@@ -39,8 +40,22 @@ export function unpack(buffer: Uint8Array, start = 0, end = buffer.length): stri
 }
 
 export function pack(str: string, buffer: Uint8Array, index = 0): number {
+  const len = str.length;
+  if (len < 1) return index;
+
+  // Node.js: use Buffer.write()
+  if (hasBuffer && Buffer.isBuffer(buffer)) {
+    return index + buffer.write(str, index, "utf8");
+  }
+
+  // Long strings: use TextEncoder
+  if (len > 64) {
+    return index + textEncoder.encodeInto(str, index === 0 ? buffer : buffer.subarray(index)).written;
+  }
+
+  // Short strings: use pure JS
   let c1: number, c2: number;
-  for (let i = 0; i < str.length; i++) {
+  for (let i = 0; i < len; i++) {
     c1 = str.charCodeAt(i);
     if (c1 < 128) {
       buffer[index++] = c1;
